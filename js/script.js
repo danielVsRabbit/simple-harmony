@@ -144,6 +144,8 @@ function displayResults(){
     
     //DISPLAYS CHORDS IN CHORD PROGRESSION
     var progression = generateProgression(progType, scale, minMaj);
+
+    playSequence(progression);
     
     //DYNAMIC CREATION OF ONE BUTTON PER CHORD 
     var divChordProg = document.getElementById("chord-prog");
@@ -203,6 +205,41 @@ function playChord(notes) {
 			    MIDI.setVolume(0, 127);
 			    MIDI.noteOn(0, chordNotes[i], velocity, delay);
                 MIDI.noteOff(0, chordNotes[i], delay + 0.75);
+            }
+		}
+	});
+}
+
+function playSequence(chords) {
+    MIDI.loadPlugin({
+		soundfontUrl: "./MIDI.js/soundfont/",
+        instrument: "acoustic_grand_piano",
+        /*
+		onprogress: function(state, progress) {
+			console.log(state, progress);
+        },
+        */ 
+		onsuccess: function() {
+            for (var i=0; i < chords.length; i++) {
+                var notes = chords[i].notes; 
+                var delay = 0 + i; // play one note every quarter second
+                var rootNote  = 48 + notes[0].numVal; // Base note
+                var thirdNote = 48 + notes[1].numVal; 
+                var fifthNote = 48 + notes[2].numVal; 
+
+                if (thirdNote > rootNote) {
+                    thirdNote += 12; // If the third's numVal is lower than the root's numval,  
+                    fifthNote += 12; // then bump the third and fifth note up an Octave
+                }
+                var chordNotes = [rootNote, thirdNote, fifthNote, rootNote + 12]; // add Root's Octave
+
+                var velocity = 127; // how hard the note hits
+                // play the note
+                for(var j=0; j<chordNotes.length; j++){
+                    MIDI.setVolume(0, 127);
+                    MIDI.noteOn(0, chordNotes[j], velocity, delay);
+                    MIDI.noteOff(0, chordNotes[j], delay + 0.75);
+                }
             }
 		}
 	});
